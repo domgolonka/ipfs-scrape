@@ -26,8 +26,8 @@ CREATE TABLE IF NOT EXISTS ipfs (
 func NewClient() (*Client, error) {
 	godotenv.Load()
 
-	dbuser := os.Getenv("DB_USER")
-	dbpass := os.Getenv("DB_PASS")
+	dbuser := os.Getenv("db_username")
+	dbpass := os.Getenv("db_password")
 	dbhost := os.Getenv("DB_HOST")
 	port := os.Getenv("DB_PORT")
 	var err error
