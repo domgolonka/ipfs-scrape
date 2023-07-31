@@ -3,7 +3,9 @@ package database
 import (
 	"database/sql"
 	"fmt"
+	"github.com/joho/godotenv"
 	_ "github.com/lib/pq"
+	"os"
 	"strconv"
 )
 
@@ -21,13 +23,19 @@ CREATE TABLE IF NOT EXISTS ipfs (
         unique (description, name, image, cid)
 );`
 
-func NewClient(host, port, user, password string) (*Client, error) {
+func NewClient() (*Client, error) {
+	godotenv.Load()
+
+	dbuser := os.Getenv("DB_USER")
+	dbpass := os.Getenv("DB_PASS")
+	dbhost := os.Getenv("DB_HOST")
+	port := os.Getenv("DB_PORT")
 	var err error
 	dbport, err := strconv.Atoi(port)
 	if err != nil {
 		return nil, err
 	}
-	sqlConn := fmt.Sprintf("host=%s port=%d user=%s password=%s dbname=%s sslmode=disable", host, dbport, user, password, "blockparty")
+	sqlConn := fmt.Sprintf("host=%s port=%d user=%s password=%s dbname=%s sslmode=disable", dbhost, dbport, dbuser, dbpass, "blockparty")
 	db, err := sql.Open("postgres", sqlConn)
 
 	if err != nil {

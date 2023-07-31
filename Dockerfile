@@ -1,28 +1,35 @@
-FROM golang:1.20-alpine as builder
+FROM golang:1.20.3-alpine as builder
 
 RUN apk update && apk upgrade
-RUN apk --no-cache add git
+RUN apk --no-cache add git make gcc musl-dev
 
-RUN mkdir /app
-WORKDIR /app
 
-ENV GO111MODULE=on
+WORKDIR . /app
+ARG ENV
 
-COPY . ./
+ADD . /app
 
-RUN go mod download
-RUN CGO_ENABLED=0 GOOS=linux go build -a -installsuffix cgo -o blockparty main.go
+ARG ep=api
+
+RUN #scripts/build-info.sh > ./build.json
+
+RUN cd /app && make build-$ep-static
+RUN file="$(ls -1 /app)" && echo $file
 
 # Run container
-FROM alpine:latest
+FROM alpine:latest as launch
 RUN apk --no-cache add ca-certificates
 RUN apk --no-cache add tzdata
 
 # The config file to use when running.
 ARG config
+ARG ep=core
+# The environment is set to argument for the entrypoint to work.
+ENV APP=$ep
 
 RUN mkdir /app
 WORKDIR /app
-COPY --from=builder /app/blockparty .
 
-ENTRYPOINT ["./blockparty"]
+COPY --from=builder /app/bin/$ep .
+
+ENTRYPOINT ./${APP}
