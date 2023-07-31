@@ -39,7 +39,7 @@ jobs:
         id: build-image-scraper
         env:
           ECR_REGISTRY: ${{ steps.login-ecr.outputs.registry }}
-          ECR_REPOSITORY: "api"
+          ECR_REPOSITORY: "scraper"
           IMAGE_TAG: latest
         run: |
           docker build --build-arg ep=scraper -t $ECR_REGISTRY/$ECR_REPOSITORY:$IMAGE_TAG .
